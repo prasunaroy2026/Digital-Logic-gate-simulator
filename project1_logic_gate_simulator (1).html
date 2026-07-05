@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Logic Gate Simulator | ITI IT Trade Project</title>
+<style>
+  :root{
+    --bg1:#0f172a;
+    --bg2:#1e293b;
+    --accent:#22d3ee;
+    --accent2:#a855f7;
+    --on:#22c55e;
+    --off:#ef4444;
+    --card:#111827;
+    --text:#e5e7eb;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI', Arial, sans-serif;
+    background:linear-gradient(160deg,var(--bg1),var(--bg2));
+    color:var(--text);
+    min-height:100vh;
+    padding:24px;
+  }
+  header{
+    text-align:center;
+    margin-bottom:24px;
+  }
+  header h1{
+    font-size:2rem;
+    margin-bottom:6px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  header p{color:#94a3b8;margin:0;}
+
+  .container{
+    max-width:1000px;
+    margin:0 auto;
+  }
+
+  .gate-select{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:10px;
+    margin-bottom:28px;
+  }
+  .gate-btn{
+    background:var(--card);
+    border:2px solid #334155;
+    color:var(--text);
+    padding:10px 20px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:bold;
+    font-size:0.95rem;
+    transition:all .2s;
+  }
+  .gate-btn:hover{border-color:var(--accent);transform:translateY(-2px);}
+  .gate-btn.active{
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    color:#0f172a;
+    border-color:transparent;
+  }
+
+  .panel{
+    background:var(--card);
+    border-radius:16px;
+    padding:28px;
+    box-shadow:0 10px 30px rgba(0,0,0,.4);
+    display:flex;
+    flex-wrap:wrap;
+    gap:32px;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .circuit{
+    display:flex;
+    align-items:center;
+    gap:18px;
+  }
+
+  .input-col{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+  }
+
+  .switch{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .switch label{font-weight:bold;color:#cbd5e1;}
+  .toggle{
+    width:60px;height:32px;
+    background:#334155;
+    border-radius:20px;
+    position:relative;
+    cursor:pointer;
+    border:2px solid #475569;
+    transition:background .2s;
+  }
+  .toggle.on{background:var(--on);border-color:#16a34a;}
+  .toggle .knob{
+    width:24px;height:24px;
+    background:#f1f5f9;
+    border-radius:50%;
+    position:absolute;
+    top:2px;left:2px;
+    transition:left .2s;
+  }
+  .toggle.on .knob{left:32px;}
+
+  .gate-visual{
+    width:130px;
+    height:100px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+  }
+  .gate-visual svg{width:100%;height:100%;}
+
+  .output-box{
+    text-align:center;
+  }
+  .led{
+    width:70px;height:70px;
+    border-radius:50%;
+    margin:0 auto 10px;
+    background:radial-gradient(circle at 35% 30%, #7f1d1d, #450a0a);
+    border:4px solid #1e293b;
+    transition:all .2s;
+    box-shadow: inset 0 0 10px rgba(0,0,0,.6);
+  }
+  .led.on{
+    background:radial-gradient(circle at 35% 30%, #86efac, #16a34a);
+    box-shadow:0 0 30px 8px rgba(34,197,94,.7), inset 0 0 10px rgba(0,0,0,.3);
+  }
+  .output-box span{
+    font-size:1.4rem;
+    font-weight:bold;
+  }
+
+  table{
+    border-collapse:collapse;
+    margin-top:10px;
+    width:100%;
+  }
+  th,td{
+    border:1px solid #334155;
+    padding:8px 14px;
+    text-align:center;
+  }
+  th{background:#1e293b;color:var(--accent);}
+  .truth-wrap{margin-top:28px;background:var(--card);padding:20px;border-radius:16px;}
+  .truth-wrap h3{margin-top:0;color:var(--accent2);}
+
+  footer{
+    text-align:center;
+    margin-top:30px;
+    color:#64748b;
+    font-size:0.85rem;
+  }
+
+  @media(max-width:600px){
+    .panel{flex-direction:column;}
+    .circuit{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚡ Digital Logic Gate Simulator</h1>
+  <p>ITI Information Technology Trade — Year 1 Practical Project</p>
+</header>
+
+<div class="container">
+
+  <div class="gate-select" id="gateSelect">
+    <button class="gate-btn active" data-gate="AND">AND</button>
+    <button class="gate-btn" data-gate="OR">OR</button>
+    <button class="gate-btn" data-gate="NOT">NOT</button>
+    <button class="gate-btn" data-gate="NAND">NAND</button>
+    <button class="gate-btn" data-gate="NOR">NOR</button>
+    <button class="gate-btn" data-gate="XOR">XOR</button>
+  </div>
+
+  <div class="panel">
+    <div class="circuit">
+      <div class="input-col">
+        <div class="switch">
+          <label>Input A</label>
+          <div class="toggle" id="toggleA"><div class="knob"></div></div>
+        </div>
+        <div class="switch" id="switchBWrap">
+          <label>Input B</label>
+          <div class="toggle" id="toggleB"><div class="knob"></div></div>
+        </div>
+      </div>
+
+      <div class="gate-visual" id="gateVisual"></div>
+
+      <div class="output-box">
+        <div class="led" id="outputLed"></div>
+        <span id="outputText">OUTPUT = 0</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="truth-wrap">
+    <h3>📋 Truth Table — <span id="ttGateName">AND</span> Gate</h3>
+    <table id="truthTable"></table>
+  </div>
+</div>
+
+<footer>Built for ITI IT Trade Practical Examination &copy; 2026</footer>
+
+<script>
+  // ---------- State ----------
+  let currentGate = "AND";
+  let A = false, B = false;
+
+  const gateButtons = document.querySelectorAll(".gate-btn");
+  const toggleA = document.getElementById("toggleA");
+  const toggleB = document.getElementById("toggleB");
+  const switchBWrap = document.getElementById("switchBWrap");
+  const outputLed = document.getElementById("outputLed");
+  const outputText = document.getElementById("outputText");
+  const gateVisual = document.getElementById("gateVisual");
+  const truthTable = document.getElementById("truthTable");
+  const ttGateName = document.getElementById("ttGateName");
+
+  // ---------- Gate logic functions ----------
+  const gateLogic = {
+    AND:  (a,b) => a && b,
+    OR:   (a,b) => a || b,
+    NOT:  (a)   => !a,
+    NAND: (a,b) => !(a && b),
+    NOR:  (a,b) => !(a || b),
+    XOR:  (a,b) => (a || b) && !(a && b)
+  };
+
+  // ---------- SVG shapes for each gate ----------
+  const gateSVG = {
+    AND: `<svg viewBox="0 0 130 100"><path d="M30 20 H65 A30 30 0 0 1 65 80 H30 Z" fill="none" stroke="#22d3ee" stroke-width="4"/>
+      <line x1="0" y1="35" x2="30" y2="35" stroke="#22d3ee" stroke-width="4"/>
+      <line x1="0" y1="65" x2="30" y2="65" stroke="#22d3ee" stroke-width="4"/>
+      <line x1="95" y1="50" x2="130" y2="50" stroke="#22d3ee" stroke-width="4"/></svg>`,
+    OR: `<svg viewBox="0 0 130 100"><path d="M20 20 Q45 50 20 80 Q55 80 90 50 Q55 20 20 20 Z" fill="none" stroke="#a855f7" stroke-width="4"/>
+      <line x1="0" y1="35" x2="27" y2="35" stroke="#a855f7" stroke-width="4"/>
+      <line x1="0" y1="65" x2="27" y2="65" stroke="#a855f7" stroke-width="4"/>
+      <line x1="90" y1="50" x2="130" y2="50" stroke="#a855f7" stroke-width="4"/></svg>`,
+    NOT: `<svg viewBox="0 0 130 100"><path d="M30 20 L30 80 L90 50 Z" fill="none" stroke="#22d3ee" stroke-width="4"/>
+      <circle cx="97" cy="50" r="7" fill="none" stroke="#22d3ee" stroke-width="4"/>
+      <line x1="0" y1="50" x2="30" y2="50" stroke="#22d3ee" stroke-width="4"/>
+      <line x1="104" y1="50" x2="130" y2="50" stroke="#22d3ee" stroke-width="4"/></svg>`,
+    NAND: `<svg viewBox="0 0 130 100"><path d="M25 20 H60 A30 30 0 0 1 60 80 H25 Z" fill="none" stroke="#f59e0b" stroke-width="4"/>
+      <circle cx="97" cy="50" r="7" fill="none" stroke="#f59e0b" stroke-width="4"/>
+      <line x1="0" y1="35" x2="25" y2="35" stroke="#f59e0b" stroke-width="4"/>
+      <line x1="0" y1="65" x2="25" y2="65" stroke="#f59e0b" stroke-width="4"/>
+      <line x1="104" y1="50" x2="130" y2="50" stroke="#f59e0b" stroke-width="4"/></svg>`,
+    NOR: `<svg viewBox="0 0 130 100"><path d="M18 20 Q43 50 18 80 Q50 80 82 50 Q50 20 18 20 Z" fill="none" stroke="#ef4444" stroke-width="4"/>
+      <circle cx="90" cy="50" r="7" fill="none" stroke="#ef4444" stroke-width="4"/>
+      <line x1="0" y1="35" x2="25" y2="35" stroke="#ef4444" stroke-width="4"/>
+      <line x1="0" y1="65" x2="25" y2="65" stroke="#ef4444" stroke-width="4"/>
+      <line x1="97" y1="50" x2="130" y2="50" stroke="#ef4444" stroke-width="4"/></svg>`,
+    XOR: `<svg viewBox="0 0 130 100"><path d="M10 20 Q35 50 10 80 Q45 80 80 50 Q45 20 10 20 Z" fill="none" stroke="#22c55e" stroke-width="4"/>
+      <path d="M3 20 Q28 50 3 80" fill="none" stroke="#22c55e" stroke-width="4"/>
+      <line x1="0" y1="35" x2="15" y2="35" stroke="#22c55e" stroke-width="4"/>
+      <line x1="0" y1="65" x2="15" y2="65" stroke="#22c55e" stroke-width="4"/>
+      <line x1="80" y1="50" x2="130" y2="50" stroke="#22c55e" stroke-width="4"/></svg>`
+  };
+
+  // ---------- Rendering ----------
+  function renderGateVisual(){
+    gateVisual.innerHTML = gateSVG[currentGate];
+  }
+
+  function updateOutput(){
+    let result;
+    if(currentGate === "NOT"){
+      result = gateLogic.NOT(A);
+    } else {
+      result = gateLogic[currentGate](A,B);
+    }
+    outputLed.classList.toggle("on", result);
+    outputText.textContent = "OUTPUT = " + (result ? 1 : 0);
+    return result;
+  }
+
+  function buildTruthTable(){
+    ttGateName.textContent = currentGate;
+    let rows = "";
+    if(currentGate === "NOT"){
+      rows += "<tr><th>A</th><th>OUTPUT</th></tr>";
+      [0,1].forEach(a=>{
+        rows += `<tr><td>${a}</td><td>${gateLogic.NOT(!!a) ? 1 : 0}</td></tr>`;
+      });
+    } else {
+      rows += "<tr><th>A</th><th>B</th><th>OUTPUT</th></tr>";
+      [0,1].forEach(a=>{
+        [0,1].forEach(b=>{
+          rows += `<tr><td>${a}</td><td>${b}</td><td>${gateLogic[currentGate](!!a,!!b) ? 1 : 0}</td></tr>`;
+        });
+      });
+    }
+    truthTable.innerHTML = rows;
+  }
+
+  function updateAll(){
+    switchBWrap.style.display = (currentGate === "NOT") ? "none" : "flex";
+    renderGateVisual();
+    updateOutput();
+    buildTruthTable();
+  }
+
+  // ---------- Event listeners ----------
+  gateButtons.forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      gateButtons.forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      currentGate = btn.dataset.gate;
+      updateAll();
+    });
+  });
+
+  toggleA.addEventListener("click", ()=>{
+    A = !A;
+    toggleA.classList.toggle("on", A);
+    updateOutput();
+    highlightTruthRow();
+  });
+
+  toggleB.addEventListener("click", ()=>{
+    B = !B;
+    toggleB.classList.toggle("on", B);
+    updateOutput();
+    highlightTruthRow();
+  });
+
+  function highlightTruthRow(){
+    // simple re-render, keeps code short and error-free
+    buildTruthTable();
+  }
+
+  // ---------- Initial load ----------
+  updateAll();
+</script>
+
+</body>
+</html>
